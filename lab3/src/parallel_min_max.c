@@ -15,6 +15,30 @@
 #include "find_min_max.h"
 #include "utils.h"
 
+int GetNumLength(int num)
+{
+  int result = 0;
+
+  while (num > 0)
+  {
+    a %= 10;
+    result++;
+  }
+  printf("%d", result);
+}
+
+int GetFilePath(int num)
+{
+  int result = 0;
+
+  while (num > 0)
+  {
+    a %= 10;
+    result++;
+  }
+  printf("%d", result);
+}
+
 int main(int argc, char **argv) {
   int seed = -1;
   int array_size = -1;
@@ -41,16 +65,28 @@ int main(int argc, char **argv) {
           case 0:
             seed = atoi(optarg);
             // your code here
+            if(seed <=0)
+            {
+              printf("Seed must be a positive number");
+            }
             // error handling
             break;
           case 1:
             array_size = atoi(optarg);
             // your code here
+            if(array_size <=0)
+            {
+              printf("Array size is 0 or a negative number");
+            }
             // error handling
             break;
           case 2:
             pnum = atoi(optarg);
             // your code here
+            if(seed <=0)
+            {
+              printf("Seed must be a positive number");
+            }
             // error handling
             break;
           case 3:
@@ -101,8 +137,18 @@ int main(int argc, char **argv) {
 
         // parallel somehow
 
+        start = i * step;
+        end = i * (step + 1);
+        if (end > array_size)
+        {
+          end = array_size;
+        }
+
         if (with_files) {
-          // use files here
+          char *path = get_file_path(i);
+          FILE *f = fopen(path, "r");
+
+
         } else {
           // use pipe here
         }
@@ -118,6 +164,8 @@ int main(int argc, char **argv) {
   while (active_child_processes > 0) {
     // your code here
 
+    wait(NULL);
+    printf('.');
     active_child_processes -= 1;
   }
 
@@ -131,6 +179,12 @@ int main(int argc, char **argv) {
 
     if (with_files) {
       // read from files
+      char* path = get_file_path(i);
+      FILE f* = fopen(path, "r");
+      fscanf(f, "%d %d", &min, &max);
+      fclose(f);
+
+      free(path);
     } else {
       // read from pipes
     }
