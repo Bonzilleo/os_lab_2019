@@ -11,9 +11,13 @@ void RevertString(char *str)
   len = strlen(str);
   for (i = 0; i < len / 2; i++)
   {
+    if (i % 2)
+    {
     temp = str[i];
     str[i] = str[len - 1 - i];
     str[len - 1 - i] = temp;
+    }
+
   }
 
 }
