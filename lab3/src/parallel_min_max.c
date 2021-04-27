@@ -16,10 +16,36 @@
 #include "find_min_max.h"
 #include "utils.h"
 
+<<<<<<< HEAD
 #define FILE_PREFIX "/tmp/parallel_min_max_"
 
 int get_number_length(int a);
 char *get_file_path(int i);
+=======
+int GetNumLength(int num)
+{
+  int result = 0;
+
+  while (num > 0)
+  {
+    a %= 10;
+    result++;
+  }
+  printf("%d", result);
+}
+
+int GetFilePath(int num)
+{
+  int result = 0;
+
+  while (num > 0)
+  {
+    a %= 10;
+    result++;
+  }
+  printf("%d", result);
+}
+>>>>>>> 2732d4f1fcce3f151d060a88a199359ed2604b53
 
 int main(int argc, char **argv) {
   int seed = -1;
@@ -49,24 +75,41 @@ int main(int argc, char **argv) {
           case 0:
             seed = atoi(optarg);
             // your code here
+<<<<<<< HEAD
             if (seed <= 0) {
               printf("Seed must be a positive number\n");
               return -1;
+=======
+            if(seed <=0)
+            {
+              printf("Seed must be a positive number");
+>>>>>>> 2732d4f1fcce3f151d060a88a199359ed2604b53
             }
             // error handling
             break;
           case 1:
             array_size = atoi(optarg);
+<<<<<<< HEAD
             //  your code here
             if (array_size <= 0) {
               printf("array_size must be a positive integer\n");
               return -1;
+=======
+            // your code here
+            if(array_size <=0)
+            {
+              printf("Array size is 0 or a negative number");
+>>>>>>> 2732d4f1fcce3f151d060a88a199359ed2604b53
             }
             // error handling
             break;
           case 2:
             pnum = atoi(optarg);
             // your code here
+            if(seed <=0)
+            {
+              printf("Seed must be a positive number");
+            }
             // error handling
             if (pnum <= 0) {
               printf("pnum must be a positive integer\n");
@@ -154,6 +197,7 @@ int main(int argc, char **argv) {
 
         start = i * step;
         end = i * (step + 1);
+<<<<<<< HEAD
         if (end > array_size) end = array_size;
 
         struct MinMax mm = GetMinMax(array, start, end);
@@ -167,6 +211,17 @@ int main(int argc, char **argv) {
           fclose(f);
 
           free(path);
+=======
+        if (end > array_size)
+        {
+          end = array_size;
+        }
+
+        if (with_files) {
+          char *path = get_file_path(i);
+          FILE *f = fopen(path, "r");
+
+>>>>>>> 2732d4f1fcce3f151d060a88a199359ed2604b53
 
         } else {
           // use pipe here
@@ -186,6 +241,7 @@ int main(int argc, char **argv) {
 
   while (active_child_processes > 0) {
     // your code here
+<<<<<<< HEAD
     if (wait(NULL) >= 0) {
       active_child_processes -= 1;
       printf(".%d\n", active_child_processes);
@@ -197,6 +253,12 @@ int main(int argc, char **argv) {
         return -1;
       }
     }
+=======
+
+    wait(NULL);
+    printf('.');
+    active_child_processes -= 1;
+>>>>>>> 2732d4f1fcce3f151d060a88a199359ed2604b53
   }
 
   struct MinMax min_max;
@@ -208,8 +270,14 @@ int main(int argc, char **argv) {
     int max = INT_MIN;
 
     if (with_files) {
+<<<<<<< HEAD
       char *path = get_file_path(i);
       FILE *f = fopen(path, "r");
+=======
+      // read from files
+      char* path = get_file_path(i);
+      FILE f* = fopen(path, "r");
+>>>>>>> 2732d4f1fcce3f151d060a88a199359ed2604b53
       fscanf(f, "%d %d", &min, &max);
       fclose(f);
 
