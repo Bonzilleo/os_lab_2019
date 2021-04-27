@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <signal.h>
 
 #include <sys/time.h>
 #include <sys/types.h>
@@ -21,22 +22,27 @@
 int get_number_length(int a);
 char *get_file_path(int i);
 
+bool g_alarm = false;
+void alarmSignalHandler(int);
+
 int main(int argc, char **argv) {
   int seed = -1;
   int array_size = -1;
   int pnum = -1;
   bool with_files = false;
-
+  int timeout = -1;
 
   while (true) {
     int current_optind = optind ? optind : 1;
 
-    static struct option options[] = {{"seed", required_argument, 0, 0},
-                                      {"array_size", required_argument, 0, 0},
-                                      {"pnum", required_argument, 0, 0},
-                                      {"by_files", no_argument, 0, 'f'},
-                                      {"timeout", required_argument, 0, 0},
-                                      {0, 0, 0, 0}};
+    static struct option options[] = {
+                                        {"seed",          required_argument,  0, 0    },
+                                        {"array_size",    required_argument,  0, 0    },
+                                        {"pnum",          required_argument,  0, 0    },
+                                        {"timeout",       required_argument,  0, 0    },
+                                        {"by_files",      no_argument,        0, 'f'  },
+                                        {0,               0,                  0, 0    }
+                                    };
 
     int option_index = 0;
     int c = getopt_long(argc, argv, "f", options, &option_index);
@@ -49,19 +55,17 @@ int main(int argc, char **argv) {
           case 0:
             seed = atoi(optarg);
             // your code here
-            if (seed <= 0) {
-              printf("Seed must be a positive number\n");
-              return -1;
-            }
             // error handling
             break;
           case 1:
             array_size = atoi(optarg);
             //  your code here
+
             if (array_size <= 0) {
               printf("array_size must be a positive integer\n");
               return -1;
             }
+
             // error handling
             break;
           case 2:
@@ -74,6 +78,16 @@ int main(int argc, char **argv) {
             }
             break;
           case 3:
+            timeout = atoi(optarg);
+
+            if (timeout <= 0) {
+              printf("timeout must be positive\n");
+              return -1;
+            }
+
+            break;
+
+          case 4:
             with_files = true;
             break;
 
@@ -99,12 +113,14 @@ int main(int argc, char **argv) {
   }
 
   if (seed == -1 || array_size == -1 || pnum == -1) {
-    printf("Usage: %s --seed \"num\" --array_size \"num\" --pnum \"num\" \n",
+    printf("Usage: %s --seed \"num\" --array_size \"num\" --pnum \"num\" --timeout \"seconds\"\n",
            argv[0]);
     return 1;
   }
-  
- int *array = malloc(sizeof(int) * array_size);
+
+
+
+  int *array = malloc(sizeof(int) * array_size);
   GenerateArray(array, array_size, seed);
   int active_child_processes = 0;
 
@@ -116,6 +132,7 @@ int main(int argc, char **argv) {
   signal(SIGCHLD, SIG_IGN); // Ignore children return
 
   int (*pipefds)[2];
+	
   if (!with_files) {
     pipefds = malloc(sizeof(int[2]) * pnum);
     for (int i = 0; i < pnum; ++i) {
@@ -140,6 +157,10 @@ int main(int argc, char **argv) {
     }
   }
   
+  signal(SIGALRM, alarmSignalHandler);
+
+  if (timeout > 0) alarm(timeout);
+
   for (int i = 0; i < pnum; i++) {
     
     pid_t child_pid = fork();
@@ -186,16 +207,24 @@ int main(int argc, char **argv) {
 
   while (active_child_processes > 0) {
     // your code here
-    if (wait(NULL) >= 0) {
+    int waitStatus = waitpid(-1, NULL, WNOHANG);
+    if (waitStatus > 0) {
       active_child_processes -= 1;
       printf(".%d\n", active_child_processes);
-    } else {
+    } else if (waitStatus != 0) {
       if (errno == ECHILD) { // No children
         active_child_processes = 0;
       } else {
         printf("wait(NULL) returned error %d\n", errno);
         return -1;
       }
+    }
+
+    if (g_alarm) {
+      printf("Timed out after %d second(s), stopping execution\n", timeout);
+      // signal(SIGQUIT, SIG_IGN);
+      kill(0, SIGKILL);
+      return 0;
     }
   }
 
@@ -275,4 +304,8 @@ char *get_file_path(int i) {
 
   free(number);
   return path;
+}
+
+void alarmSignalHandler(int signum) {
+  g_alarm = true;
 }

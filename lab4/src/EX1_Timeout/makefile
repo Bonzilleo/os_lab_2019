@@ -22,4 +22,4 @@ find_min_max.o : utils.h find_min_max.h find_min_max.c
 
 
 clean :
-	rm utils.o find_min_max.o sequential_MM parallel_MM launch_seq
+	rm utils.o find_min_max.o sequential_MM parallel_MM
